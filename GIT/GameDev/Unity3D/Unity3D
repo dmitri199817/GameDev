@@ -1,0 +1,394 @@
+
+		Unity3D
+----------------------------------------
+
+1. УПРАВЛЕНИЕ ПРИЛОЖЕНИЕМ
+—————————————————————————
+
+1) создание объекта
+
+в поле слева (поле иерархии) сверху кнопка "Create"
+
+2) перемещение по миру в различных режимах:
+
+	- В режиме редактирования: ПКМ + ЦЫФВ
+
+3) трансформации объекта 
+
+Сверху над полем иерархии 5 значков
+
+4) создание skybox
+
+вкладка window -> lighting -> settings -> перетаскиваем изображение из окна Project в пункт Skybox Material
+
+4.1) рандомный выбор skybox при каждом новом запуске
+
+1) добавить скрипт к камере
+
+============================
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class script : MonoBehaviour {
+
+	public Material[] materials;
+
+	// Use this for initialization
+	void Start () {
+		GetComponent<Skybox> ().material = materials [Random.Range(0, materials.Length)]; 	
+	}
+}
+============================
+
+после сох. скрипта в компоненте скрипта появиться вкладка materials
+
+2) выбираем все картинки skybox и перетягиваем именно на название вкладки materials!!!
+
+3) добавляем компонент skybox
+
+—————————————————————————
+
+2. ВЗАИМОДЕЙСТВИЕ ОБЕКТА С МИРОМ (ФИЗИКА)
+
+—————————————————————————
+
+1) создание гравитации
+
+в поле справа (поле инспектора) добавить компонент (кнопкой add component) «rigidbody»
+
+
+ОПИСАНИЕ КОМПОНЕНТА rigidbody 
+============================
+
+mass = масса объекта
+drag = сопротивление перемещению
+angular drag = сопротивление вращению
+use gravity = использ. гравитацию
+is Kinematic = если стоит галочка, то физика не действует, но столкновения присутствуют	
+Interpolate = подключаем когда нужно сгладить прощет перемещения(когда траектория движения выглядит неестественно, т.е. с отклонениями)
+Collision detection = учитывает скорость прощета столкновения (от discrete к Continuous dynamic)
+
+============================
+
+2) столкновения объектов
+
+. . . происходит посредствам компонент Collider во вкладке physics - это форма, повторяющая геометрическую форму объекта и обрабатывающая столкновения
+
+в зависимости от объекта, существуют различные коллайдеры: box collider; sphere collider 
+и тд
+
+также можно добавить материалы(перетаскивающем из окна project во вкладку Material компонента Collider). Материалы задают определенные физические св-ва объекта(ice задает скольжение подобно льду(трение минимально), bouncy - прыгучесть, подобно мячику и тд)
+ 
+3) ткань(cloth)
+задает плоскости св-ва ткани
+
+4) кости(joint)
+4.1)Hinge joint - подвиг. кость
+4.2)Fixed joint - миксеров. кость
+
+с помощью этих коллайдеров можно создавать цепи, таблички(развевающиеся на ветру) и тд
+
+5) Constant Force
+
+задает постоянное ускорение объекта по выбранной оси
+
+Force - ускорение в миров. коорд.
+Relative Force - ускор. в локальн. коорд.
+Torque - вращ. момент в миров. коорд.
+Relative - вращ. момент в локальн. коорд.
+—————————————————————————
+
+3. 	СЦЕНАРИИ (ОБРАБОТКА НАЖАТИЙ КЛАВИАТУРЫ)
+
+—————————————————————————
+
+сценарии - это компонент объекта 
+
+компонент - это свойство объекта(транспонирование, ротация, скаляция, гравитация и тд.)
+
+============================
+добавление сценария:
+
+в поле справа(поле инспектора) добавляем компонент кнопкой add component выбираем(ищем в поиске) «script»
+============================
+
+
+Пример: генерация кубов над плоскостью, столкновение их
+
+========================================================
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class CubeGenerator : MonoBehaviour {
+
+	// Use this for initialization
+	void Start () {
+		
+
+	}
+
+	// Update is called once per frame
+	void Update () {
+		MeshRenderer render = gameObject.GetComponent<MeshRenderer>(); //получаем компонент, отвечающий за координаты и объемы объекта
+
+		float minX = render.bounds.min.x;
+		float minZ = render.bounds.min.z;
+		float maxX = render.bounds.max.x;
+		float maxZ = render.bounds.max.z;
+
+
+		float newX = Random.Range(minX, maxX); // генерация рандомных координат появления куба(в пределах плоскости)
+		float newZ = Random.Range(minZ, maxZ);
+		float newY = gameObject.transform.position.y + 5;
+
+		if (Input.GetKeyDown(KeyCode.Space)) {
+			GameObject cube = GameObject.CreatePrimitive (PrimitiveType.Cube);
+			cube.transform.position = new Vector3(newX, newY, newZ);
+		//если нажата клавиша «пробел», то создаем куб и перемещаем его по координатам
+			cube.AddComponent<Rigidbody>(); // создаем компонент «Rigidbody», отвечающий за гравитацию
+		}
+	}
+}
+========================================================
+
+
+
+	3.1 ДВИЖЕНИЕ ОБЪЕКТА ПО МИРУ КНОПКАМИ WSAD
+
+========================================================
+void Update () {
+		Transform T = gameObject.GetComponent<Transform>();// получаем компонент, отвечающий за трансформации объекта
+		MeshRenderer render = gameObject.GetComponent<MeshRenderer>(); // получаем компонент, отвечающий за координаты и объемы объекта
+
+		float X = render.bounds.center.x; // получаем средние X и Z
+		float Z = render.bounds.center.z;
+
+		float newX1 = X + 1;
+		float newZ1 = Z + 1;
+		float newX2 = X - 1;
+		float newZ2 = Z - 1;
+
+		if (Input.GetKey (KeyCode.W)) {
+			T.transform.position = new Vector3(X, 0, newZ1);
+		}
+
+		if (Input.GetKey (KeyCode.S)) {
+			T.transform.position = new Vector3(X, 0, newZ2);
+		}
+
+		if (Input.GetKey (KeyCode.A)) {
+			T.transform.position = new Vector3(newX2, 0, Z);
+		}
+
+		if (Input.GetKey (KeyCode.D)) {
+			T.transform.position = new Vector3(newX1, 0, Z);
+		}
+	}
+========================================================
+
+	3.2 ВРАЩЕНИЕ ОБЪЕКТА
+
+FixedUpdate() - обновление экрана вне зависимости от производительности видеокарты(привязка ко времени). Обновление экрана каждые 0.02 сек = 50 раз/сек
+
+Вращение объектов в Unity по Кватернионам!
+
+Кватернион - это ось + угол вращения объекта
+
+При умножении кватернионов 1-ый становиться точкой отсчета для 2-го. Из-за этого важен порядок их умножения. Для правильного вращения по двум осям обычно заносят в переменную начальный угол(0 градусов) и от него вращают по двум осям, перемножая кватернионы этих осей и начальный угол между собой! 
+————————————————————————————————————————————————
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Rotator : MonoBehaviour {
+
+	Quaternion originRotation; // начальный угол поворота( 0 градусов)
+	float angle;
+
+	// Use this for initialization
+	void Start () {
+		originRotation = transform.rotation;
+	}
+	
+	// Update is called once per frame
+	void FixedUpdate () {
+		angle++;/*угол постоянно увеличивается на 1 чтобы объект постоянно вращался. Если просто указать величину угла, то объект просто единожды провернёться на величину угла и остановиться!*/
+
+		Quaternion Y = Quaternion.AngleAxis (angle, Vector3.up); // задаем кватернион, где angle -  угол; Vector3.up - ось Y
+		Quaternion X = Quaternion.AngleAxis (angle, new Vector3(1,0,0));// по оси X
+
+		transform.rotation = originRotation * X * Y; /* задаем вращение(по двум осям сразу); очень важен порядок умножения осей!!!*/
+	}
+}
+
+========================================================
+
+
+—————————————————————————
+
+4. СИСТЕМА СОбЫТИЙ (УПРАВЛЕНИЕ МЫШКОЙ)
+
+—————————————————————————
+
+Событие - это движение мышки, нажатия на ее кнопки и тд
+
+========================================================
+
+	4.1 ИЗМЕНЕНИЕ ОБЪЕКТА ПО НАЖАТИЮ МЫШКИ
+
+1) Добавить объект EventSystem( окно иерархии -> Create -> UI )
+
+2) Добавить к камере компонент Physics Raycaster
+
+3) К объекту, с которым будет выполнятся непосредственное взаимодействие добавить Script
+
+
+//ПО НАЖАТИЮ ЛКМ НА ОБЪЕКТ, ОН КРАСИТСЯ В РАНДОМНЫЙ ЦВЕТ
+========================================================
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems; // явно указываем на систему событий
+
+public class Clicker : MonoBehaviour, IPointerClickHandler {
+
+	// Use this for initialization
+	void Start () {
+		
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		
+	}
+
+	public void OnPointerClick(PointerEventData eventData) {
+
+
+		float red = Random.Range (0.0f, 1.0f); // рандомайзер
+		float green = Random.Range (0.0f, 1.0f);
+		float blue = Random.Range (0.0f, 1.0f);
+
+		Color color = new Color (red, green, blue); // создаем метод окраски
+
+		gameObject.GetComponent<Renderer> ().material.color = color; // присваевыаем материалу объекта цвет
+	}
+}
+
+========================================================
+
+ТОЛЧОК ОБЪЕКТА ПО НАЖАТИЮ НА ЛКМ
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems; // явно указываем на систему событий
+
+public class Clicker : MonoBehaviour, IPointerClickHandler {
+
+	// Use this for initialization
+	void Start () {
+		
+	}
+	
+	// Update is called once per frame
+	void Update () {
+		
+	}
+
+	public void OnPointerClick(PointerEventData eventData) {
+
+		Vector3 pointA = eventData.pointerPressRaycast.worldPosition;
+		Vector3 pointB = Camera.main.transform.position;
+
+		Vector3 direction = pointA - pointB;
+
+		direction = direction.normalized;
+
+		Vector3 force = direction * 500;
+		Vector3 target = eventData.pointerPressRaycast.worldPosition;
+
+		gameObject.GetComponent<Rigidbody> ().AddForceAtPosition (force, target);
+	}
+}
+
+========================================================
+
+—————————————————————————
+
+5. УПРАВЛЕНИЕ КАМЕРОЙ
+
+—————————————————————————
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Camera : MonoBehaviour {
+	
+	Quaternion originRotation;
+	float angleHorizontal;
+	float angleVertical;
+	float sens = 5; // коэфф., усиливающий чувствительность вращения камерой
+	float stopFactor = 8; // коэфф., ограничивающий скорость перемещения камеры
+
+	// Use this for initialization
+	void Start () {
+		originRotation = transform.rotation;
+		Cursor.lockState = CursorLockMode.Locked; //блокировка курсора
+	}
+
+	// Update is called once per frame
+	void FixedUpdate () {
+
+		//вращение камерой
+
+		angleHorizontal += Input.GetAxis ("Mouse X") * sens;// 1)получили перемещение мыши
+		angleVertical += Input.GetAxis ("Mouse Y") * sens;
+
+		angleVertical = Mathf.Clamp (angleVertical, -60, 60);/* 1.1)чтобы камера не делала полный оборот(360 градусов),
+		ограничим угол максимального смещения до 60 градусов вверх и вниз (120 градусов суммарно)*/
+
+		Quaternion Y = Quaternion.AngleAxis (angleHorizontal, Vector3.up);// 2)перевели перемещение мыши в угол поворота камеры
+		Quaternion X = Quaternion.AngleAxis (-angleVertical, Vector3.right);
+
+		transform.rotation = originRotation * Y * X;// 3) применили трасформацию вращения с заданным углом
+
+		////////////////////////////
+
+		// управление перемещением камеры
+
+		if (Input.GetKey (KeyCode.W)) {
+			transform.position += transform.forward / stopFactor;		
+		}
+		if (Input.GetKey (KeyCode.S)) {
+			transform.position -= transform.forward / stopFactor;		
+		}
+		if (Input.GetKey (KeyCode.A)) {
+			transform.position -= transform.right / stopFactor;		
+		}
+		if (Input.GetKey (KeyCode.D)) {
+			transform.position += transform.right / stopFactor;		
+		}
+	}
+}
+
+========================================================
+
+
+
+
+
+
+
+
+
+
+
+

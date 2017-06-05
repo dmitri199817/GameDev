@@ -1,0 +1,83 @@
+
+				#«јћ≈“ » GLUT#
+------------------------------------------------------------------------------
+void glutDisplayFunc (void (*func) (void)) Ч задает функцию рисовани€ изображени€
+
+void glutReshapeFunc (void (*func) (int width, int height)) Ч задает функцию обработки изменени€ размеров окна
+
+void glutVisibilityFunc (void (*func)(int state)) Ч задает функцию обработки изменени€ состо€ни€ видимости окна
+
+void glutKeyboardFunc (void (*func)(unsigned char key, int x, int y)) Ч задает функцию обработки нажати€ клавиш клавиатуры (только тех, что генерируют ascii-символы)
+
+void glutSpecialFunc (void (*func)(int key, int x, int y)) Ч задает функцию обработки нажати€ клавиш клавиатуры (тех, что не генерируют ascii-символы)
+
+void glutIdleFunc (void (*func) (void)) Ч задает функцию, вызываемую при отсутствии других событий
+
+void glutMouseFunc (void (*func) (int button, int state, int x, int y)) Ч задает функцию, обрабатывающую команды мыши
+
+void glutMotionFunc (void (*func)(int x, int y)) Ч задает функцию, обрабатывающую движение курсора мыши, когда зажата кака€-либо кнопка мыши
+
+void glutPassiveMotionFunc (void (*func)(int x, int y)) Ч задает функцию, 
+обрабатывающую движение курсора мыши, когда не зажато ни одной кнопки мыши
+
+void glutEntryFunc (void (*func)(int state)) Ч задает функцию, обрабатывающую движение курсора за пределы окна и его возвращение
+
+void glutTimerFunc (unsigned int msecs, void (*func)(int value), value) Ч задает функцию, вызываемую по таймеру
+
+------------------------------------------------------------------------------
+glutSetCursor(int cursor) - действи€ над курсором
+
+—писок констант дл€ курсора:
+GLUT_CURSOR_RIGHT_ARROW
+стрелка вверх-вправо
+GLUT_CURSOR_LEFT_ARROW
+стрелка вверх-влево
+GLUT_CURSOR_INFO
+информаци€
+GLUT_CURSOR_DESTROY
+запрет-уничтожение
+GLUT_CURSOR_HELP
+помощь (знак вопроса)
+GLUT_CURSOR_CYCLE
+вращающа€с€ стрелка
+GLUT_CURSOR_SPRAY
+спрей
+GLUT_CURSOR_WAIT
+ожидание
+GLUT_CURSOR_TEXT
+как в редактировании текста
+GLUT_CURSOR_CROSSHAIR
+Simple cross-hair.
+GLUT_CURSOR_UP_DOWN
+GLUT_CURSOR_LEFT_RIGHT
+GLUT_CURSOR_TOP_SIDE
+GLUT_CURSOR_BOTTOM_SIDE
+GLUT_CURSOR_LEFT_SIDE
+GLUT_CURSOR_RIGHT_SIDE
+GLUT_CURSOR_TOP_LEFT_CORNER
+GLUT_CURSOR_TOP_RIGHT_CORNER
+GLUT_CURSOR_BOTTOM_RIGHT_CORNER
+GLUT_CURSOR_BOTTOM_LEFT_CORNER
+GLUT_CURSOR_FULL_CROSSHAIR
+GLUT_CURSOR_NONE
+Ќевидимый
+GLUT_CURSOR_INHERIT
+ урсор родительского окна
+------------------------------------------------------------------------------
+
+ѕ–»ћ»“»¬џ:
+
+	GLUquadricObj *quadObj;    // создаем новый объект 
+        quadObj = gluNewQuadric(); // дл€ создани€ сфер и цилиндров
+
+1) gluDisk(...) // ƒиск
+
+2) gluPartialDisk(...) // —ектор ƒиска
+	
+
+
+
+
+
+
+

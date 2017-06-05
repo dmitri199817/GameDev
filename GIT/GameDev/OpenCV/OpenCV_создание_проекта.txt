@@ -1,0 +1,143 @@
+
+	СОЗДАНИЕ ПРОЕКТА OpenCV
+————————————————————————————————————————
+
+1) Открыть XCode
+Создание нового проекта
+Под Application OSX> Выберите инструмент командной строки
+Дайте вашему приложению имя затем сохранить
+
+2) Нажмите на файл проекта XCode
+Нажмите Build Settings
+Прокрутите вниз , пока вы находите Search Paths
+Двойной щелчок на Header Search Paths Введите в следующем «/usr/local/include»
+
+3) Следующий Дважды Нажмите Library Search Paths Введите в следующем «/usr/local/lib»
+
+4) Прокрутите вниз до Linking
+Двойной щелчок Other Linker Flags
+Скопируйте и вставьте:
+
+-lopencv_calib3d -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_highgui -lopencv_imgcodecs -lopencv_imgproc -lopencv_ml -lopencv_objdetect -lopencv_photo -lopencv_shape -lopencv_stitching -lopencv_superres -lopencv_ts -lopencv_video -lopencv_videoio -lopencv_videostab
+
+5) Вставить код:
+
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio/videoio.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#include <iostream>
+#include <stdio.h>
+
+using namespace cv;
+using namespace std;
+
+//hide the local functions in an anon namespace
+namespace {
+    void help(char** av) {
+        cout << "The program captures frames from a video file, image sequence (01.jpg, 02.jpg ... 10.jpg) or camera connected to your computer." << endl
+        << "Usage:\n" << av[0] << " <video file, image sequence or device number>" << endl
+        << "q,Q,esc -- quit" << endl
+        << "space   -- save frame" << endl << endl
+        << "\tTo capture from a camera pass the device number. To find the device number, try ls /dev/video*" << endl
+        << "\texample: " << av[0] << " 0" << endl
+        << "\tYou may also pass a video file instead of a device number" << endl
+        << "\texample: " << av[0] << " video.avi" << endl
+        << "\tYou can also pass the path to an image sequence and OpenCV will treat the sequence just like a video." << endl
+        << "\texample: " << av[0] << " right%%02d.jpg" << endl;
+    }
+    
+    int process(VideoCapture& capture) {
+        int n = 0;
+        char filename[200];
+        string window_name = "video | q or esc to quit";
+        cout << "press space to save a picture. q or esc to quit" << endl;
+        namedWindow(window_name, WINDOW_KEEPRATIO); //resizable window;
+        Mat frame;
+        
+        for (;;) {
+            capture >> frame;
+            if (frame.empty())
+                break;
+            
+            imshow(window_name, frame);
+            char key = (char)waitKey(30); //delay N millis, usually long enough to display and capture input
+            
+            switch (key) {
+                case 'q':
+                case 'Q':
+                case 27: //escape key
+                    return 0;
+                case ' ': //Save an image
+                    sprintf(filename,"filename%.3d.jpg",n++);
+                    imwrite(filename,frame);
+                    cout << "Saved " << filename << endl;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return 0;
+    }
+}
+
+int main(int ac, char** av) {
+    
+    if (ac != 2) {
+        help(av);
+        return 1;
+    }
+    std::string arg = av[1];
+    VideoCapture capture(arg); //try to open string, this will attempt to open it as a video file or image sequence
+    if (!capture.isOpened()) //if this fails, try to open as a video camera, through the use of an integer param
+        capture.open(atoi(arg.c_str()));
+    if (!capture.isOpened()) {
+        cerr << "Failed to open the video device, video file or image sequence!\n" << endl;
+        help(av);
+        return 1;
+    }
+    return process(capture);
+}
+
+
+
+	УСТАНОВКА ПУТЬ СБОРКИ
+————————————————————————————————————————
+
+1) XCode Preferences
+
+2) Locations Tab
+
+3) Advanced
+
+4) Поменять Unique на Legacy
+
+
+
+	ЗАПУСК ПРИЛОЖЕНИЯ
+————————————————————————————————————————
+
+Способ 1.
+
+1) открыть терминал
+
+2) перейти в папку с исполняемым файлом
+
+3) ввести: ./<yourprojectname> 0
+
+где yourprojectname - имя исполняемого файла
+
+
+Способ 2.
+
+1) открыть терминал
+
+2) создать скрипт автоматического запуска исполняемого файла
+
+2.1) указать путь до папки с исполняемым файлом
+
+2.2) ввести: ./<yourprojectname> 0
+
+3) перевести скрипт в исполняемый файл: chmod 755 «имя_скрипта»
+
+ 

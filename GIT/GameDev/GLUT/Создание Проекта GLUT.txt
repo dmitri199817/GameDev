@@ -1,0 +1,57 @@
+	
+	СОЗДАНИЕ ПРОЕКТА GLUT (Dev C++)
+-----------------------------------------------
+
+1) создаем пустой проект
+
+2) всталяем исходный код  
+
+ИСХОДНЫЙ КОД:
+====================
+#include <glut.h>
+#include <stdlib.h>
+ 
+void renderScene(void) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ 
+	glBegin(GL_QUADS);
+		glVertex3f(-0.5,-0.5,0.0);
+		glVertex3f(-0.5,0.5,0.0);
+		glVertex3f(0.5,0.5,0.0);
+		glVertex3f(0.5,-0.5,0.0);
+	glEnd();
+ 
+        glutSwapBuffers();
+}
+
+void key(unsigned char key, int x, int y)
+{
+if (key == 27) exit(0);     
+}
+ 
+int main(int argc, char **argv) {
+ 
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+	glutInitWindowPosition(100,100);
+	glutInitWindowSize(400,400);
+	glutCreateWindow("GLUT WINDOW");
+ 
+    //Init
+	glutDisplayFunc(renderScene);
+    glutKeyboardFunc(key);
+   
+	glutMainLoop();
+ 
+	return 1;
+}
+====================
+
+3) Проект -> Параметры Проекта -> Параметры -> Компоновщик -> Добавить след. строки:
+
+---------------
+opengl32
+glut32
+glu32
+---------------
+

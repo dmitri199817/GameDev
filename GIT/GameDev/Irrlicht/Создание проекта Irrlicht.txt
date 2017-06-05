@@ -1,0 +1,41 @@
+
+СОЗДАНИЕ НОВОГО ПРОЕКТА
+-------------------------
+
+1) написать исходный код
+
+2) обозреватель решений(ctrl+alt+L)--> свойства(alt+ВВОД)
+
+3) Катологи VС++ -> Катологи включения -> указать папку с include
+
+4) Катологи VС++ -> Катологи библиотек -> указать папку с lib
+
+5) папка с приложением (*.exe) положить Irrlicht.dll
+
+6) #pragma comment(lib,"irrlicht.lib")
+---------------------------------------------------------------------------
+
+
+МИНИМАЛЬНЫЙ ИСХОДНЫЙ КОД
+-------------------------
+
+#include <irrlicht.h>
+int main()
+{
+irr::IrrlichtDevice *device = irr::createDevice(irr::video::EDT_OPENGL, irr::core::dimension2du(640,480) ,16, false);
+if (device == 0) return 1;
+irr::video::IVideoDriver* driver = device->getVideoDriver();
+irr::scene::ISceneManager* smgr = device->getSceneManager();
+
+device->setWindowCaption(L"test");
+while(device->run())
+{
+driver->beginScene(true,true, irr::video::SColor(0,100,100,100));
+smgr->drawAll();
+driver->endScene();
+}
+
+device->drop();
+return 0;
+}
+

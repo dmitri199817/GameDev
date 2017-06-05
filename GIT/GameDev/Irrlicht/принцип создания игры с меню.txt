@@ -1,0 +1,261 @@
+		Принцип создания игры с меню
+
+int main(){
+
+1) создать кнопки (GUI)
+
+2) создать камеру под кнопки
+
+3) skybox под кнопки
+
+4) skybox под игру ( отключить видимость ( sky2->setvisible(false) ) )
+
+while (device-run())
+{
+
+5) если нажата кнопка "Game": 
+
+1. создаем камеру
+
+2. убираем видимость кнопок ( but->setVisible (false); ) 
+
+3. убираем курсор ( device ->getCursorControl()->setVisible (false); )
+
+if (but->isPressed ()) 
+      {        
+        engine ->stopAllSounds (); 
+        smgr->loadScene ("../../media/level.irr"); 
+        scene::ICameraSceneNode* camera = 
+        smgr->addCameraSceneNodeFPS(); 
+        camera->setFarValue(50000.0f); 
+        camera->setPosition(core::vector3df(0,350,0)); 
+        camera->setRotation (core::vector3df (0,90,0)); 
+        but->setVisible (false); 
+        but2->setVisible (false); 
+        but3->setVisible (false); 
+        but4->setVisible (false); 
+        device ->getCursorControl()->setVisible (false); 
+
+6) загружаем все модели
+
+7) создаем коллизию
+
+	}
+
+device->drop();
+	
+
+return 0;
+}
+
+
+
+
+Пример:
+
+#include <stdio.h> 
+#include <wchar.h> 
+#include <irrlicht.h> 
+#include <iostream> 
+#include <irrKlang.h>
+
+using namespace irr; 
+using namespace core; 
+using namespace scene; 
+using namespace video; 
+using namespace io; 
+using namespace gui; 
+using namespace audio; 
+#pragma comment(lib, "Irrlicht.lib") 
+#pragma comment(lib, "irrKlang.lib") 
+
+scene::ISceneNode* node = 0; 
+IrrlichtDevice* device = 0;
+
+
+int main() 
+{ 
+int resX=1024; 
+int resY=768;
+
+video::E_DRIVER_TYPE driverType;
+
+  printf("Treasure Planet\n"\ 
+      "Programming - Abramenko Konstantin\n"\ 
+      "Music - Walt Disney Picture\n"\ 
+      "3D models - Amutsu\n"\ 
+      "Dog's Member Games\n"\ 
+      "2006-2007\n\n\n"\ 
+        "Please select the driver you want for this example:\n"\ 
+    " (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.5\n"\ 
+    " (d) Software Renderer\n (e) Burning's Software Renderer\n"\ 
+    " (f) NullDevice\n (otherKey) exit\n\n");
+
+  char i; 
+  std::cin >> i; 
+  switch(i) 
+  { 
+    case 'a': driverType = video::EDT_DIRECT3D9;break; 
+    case 'b': driverType = video::EDT_DIRECT3D8;break; 
+    case 'c': driverType = video::EDT_OPENGL;  break; 
+    case 'd': driverType = video::EDT_SOFTWARE; break; 
+    case 'e': driverType = video::EDT_SOFTWARE2;break; 
+    case 'f': driverType = video::EDT_NULL;    break; 
+    default: return 1; 
+  } 
+  IrrlichtDevice* device = 
+    createDevice(driverType, core::dimension2d<s32>(resX, resY),32,false,false,false); 
+  ISoundEngine* engine = createIrrKlangDevice(); 
+  video::IVideoDriver* driver = device->getVideoDriver(); 
+  scene::ISceneManager* smgr = device->getSceneManager(); 
+  IGUIEnvironment *env=device ->getGUIEnvironment (); 
+// Create skin 
+    for(int i = 0; i < 4; i++) 
+    { 
+        SColor col = env->getSkin()->getColor((EGUI_DEFAULT_COLOR)i); 
+        col.setAlpha(0); 
+        env->getSkin()->setColor((EGUI_DEFAULT_COLOR )i, col); 
+    }  
+//Create button on main menu 
+  IGUIButton *but=env->addButton (rect<s32>(resX/2-(resX/100*10),resY/2-170,(resX/2)+(resX/100*10),(resY/2)-140), 0, 101, L"Game"); 
+    IGUIButton *but2=env->addButton (rect<s32>(resX/2-(resX/100*10),resY/2-130,(resX/2)+(resX/100*10),(resY/2)-100), 0, 102, L"Options"); 
+    IGUIButton *but3=env->addButton (rect<s32>(resX/2-(resX/100*10),resY/2-90,(resX/2)+(resX/100*10),(resY/2)-60), 0, 103, L"Credits"); 
+    IGUIButton *but4=env->addButton (rect<s32>(resX/2-(resX/100*10),resY/2-50,(resX/2)+(resX/100*10),(resY/2)-20), 0, 104, L"Quit"); 
+// Add Camera  
+  //smgr->addCameraSceneNode(); 
+  scene::ICameraSceneNode* camera = 
+  smgr->addCameraSceneNode();
+
+
+//Set font 
+  IGUISkin* skin = env->getSkin(); 
+  IGUIFont* font = env->getFont("../../media/font2.bmp"); 
+  if (font) 
+    skin->setFont(font);
+
+//Create Sky box for menu 
+  scene::ISceneNode * sky = smgr->addSkyBoxSceneNode (  
+  driver->getTexture("../../media/irrlicht2_up.jpg"), 
+  driver->getTexture("../../media/irrlicht2_dn.jpg"), 
+  driver->getTexture("../../media/irrlicht2_lf.jpg"), 
+  driver->getTexture("../../media/irrlicht2_rt.jpg"), 
+  driver->getTexture("../../media/irrlicht2_ft.jpg"), 
+  driver->getTexture("../../media/irrlicht2_bk.jpg")); 
+  if (sky) 
+    {scene ::ISceneNodeAnimator * ansb = 
+    smgr->createRotationAnimator (core::vector3df (0,0.09,0)); 
+    sky->addAnimator (ansb); 
+    ansb->drop() ; 
+    } 
+//Create Sky box for Game 
+  scene::ISceneNode * sky2 = smgr->addSkyBoxSceneNode (  
+  driver->getTexture("../../media/irrlicht2_up.jpg"), 
+  driver->getTexture("../../media/irrlicht2_dn.jpg"), 
+  driver->getTexture("../../media/irrlicht2_lf.jpg"), 
+  driver->getTexture("../../media/irrlicht2_rt.jpg"), 
+  driver->getTexture("../../media/irrlicht2_ft.jpg"), 
+  driver->getTexture("../../media/irrlicht2_bk.jpg")); 
+  if (sky2) 
+    {scene ::ISceneNodeAnimator * ansb2 = 
+    smgr->createRotationAnimator (core::vector3df (0,0.01,0)); 
+      sky2->addAnimator (ansb2); 
+    ansb2->drop() ; 
+    }
+
+  sky2->setVisible (false);
+
+//Play music 
+engine->play2D("../../media/main.ogg", true);
+
+  int lastFPS = -1; 
+  while(device->run()) 
+  { 
+    driver->beginScene(true, true, video::SColor(255,113,113,133)); 
+    smgr->drawAll(); // draw the 3d scene 
+    device->getGUIEnvironment()->drawAll(); // draw the gui environment (the logo) 
+    env->drawAll (); 
+    driver->endScene(); 
+//Click on button 
+    if (but2->isPressed ()) 
+      { 
+      engine ->play2D ("../../Media/test.wav");  
+      but2->setPressed (0); 
+      } 
+//Click on button 
+    if (but3->isPressed ()) 
+      { 
+      engine ->play2D ("../../Media/test.wav");  
+      but3->setPressed (0); 
+      }
+
+//Click on button 
+    if (but->isPressed ()) 
+      {        
+        engine ->stopAllSounds (); 
+        smgr->loadScene ("../../media/level.irr"); 
+        scene::ICameraSceneNode* camera = 
+        smgr->addCameraSceneNodeFPS(); 
+        camera->setFarValue(50000.0f); 
+        camera->setPosition(core::vector3df(0,350,0)); 
+        camera->setRotation (core::vector3df (0,90,0)); 
+        but->setVisible (false); 
+        but2->setVisible (false); 
+        but3->setVisible (false); 
+        but4->setVisible (false); 
+        device ->getCursorControl()->setVisible (false); 
+//Load 3d model this level 
+        
+        scene::IAnimatedMesh* Level = smgr->getMesh("../../media/Level/2.b3d"); 
+        scene::ISceneNode* node = 0; 
+        if (Level) 
+        node=smgr->addOctTreeSceneNode (Level->getMesh(0)); 
+                
+//Create selector 
+        scene::ITriangleSelector* selector = 0; 
+        if (node) 
+        {    
+          node->setPosition(core::vector3df(0,0,0)); 
+          //selector =smgr->createTriangleSelector (Level->getMesh(0),node); 
+          selector = smgr->createOctTreeTriangleSelector(Level->getMesh(0), node, 128); 
+          node->setTriangleSelector(selector); 
+          selector->drop(); 
+        } 
+//Create collision animator 
+          scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator( 
+          selector, camera, core::vector3df(30,200,30), 
+          core::vector3df(0,-3,0), 
+          core::vector3df(0,50,0)); 
+          camera->addAnimator(anim); 
+          anim->drop(); 
+          engine ->play2D ("../../Media/1.ogg"); 
+          sky->setVisible (false); 
+          sky2->setVisible (true); 
+          but3->setPressed (0); 
+      } 
+//Click on button Quit 
+    if (but4->isPressed ()) 
+      { 
+        engine ->play2D ("../../Media/test.wav"); 
+        device ->closeDevice (); 
+        but4->setPressed (0); 
+        //device ->closeDevice(); 
+      }
+
+
+//FPS 
+    int fps = driver->getFPS(); 
+
+    if (lastFPS != fps) 
+    { 
+      wchar_t tmp[1024]; 
+      swprintf(tmp, 1024, L"Movement Example - Irrlicht Engine [%ls] fps: %d", 
+        driver->getName(), fps); 
+
+      device->setWindowCaption(tmp); 
+      lastFPS = fps; 
+    } 
+  }  
+  device->drop(); 
+
+  return 0; 
+}

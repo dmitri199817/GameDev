@@ -1,0 +1,1105 @@
+
+	Заметки OPENCV
+————————————————————————————————
+
+1. HELLO WORLD!
+
+====================================
+Концепция построения приложения:
+
+1) имя картинки, его путь
+
+2) создание картинки
+
+3) создание окна приложения
+
+4) вывод изображения
+
+5) освобождение памяти
+
+6) удаление окна	
+
+====================================
+ПРИМЕР:
+
+#include <cv.h>
+#include <highgui.h>
+
+int main( int argc, char** argv ) 
+{
+        // задаём высоту и ширину картинки
+        int height = 620;
+        int width = 440;
+        // задаём точку для вывода текста
+        CvPoint pt = cvPoint( height/4, width/2 );
+        // Создаёи 8-битную, 3-канальную картинку
+        IplImage* hw = cvCreateImage(cvSize(height, width), 8, 3);
+        // заливаем картинку чёрным цветом
+        cvSet(hw,cvScalar(0,0,0));
+        // инициализация шрифта
+        CvFont font;
+        cvInitFont( &font, CV_FONT_HERSHEY_COMPLEX,1.0, 1.0, 0, 1, CV_AA);
+        // используя шрифт выводим на картинку текст
+        cvPutText(hw, "OpenCV Step By Step", pt, &font, CV_RGB(150, 0, 150) );
+
+        // создаём окошко
+        cvNamedWindow("Hello World", 0);
+        // показываем картинку в созданном окне
+        cvShowImage("Hello World", hw);
+        // ждём нажатия клавиши
+        cvWaitKey(0);
+        
+        // освобождаем ресурсы
+        cvReleaseImage(&hw);
+        cvDestroyWindow("Hello World");
+        return 0;
+}
+
+Разберём некоторые функции.
+
+1) int cvNamedWindow("Hello World", 0 ); — создаёт окно, в которое мы будем выводить наше изображение.
+ 
+Первый параметр — название окна
+
+Второй — его размер, 0 — даёт возможность изменять размер окна во время выполнения программы, но обычно указывается флаг CV_WINDOW_AUTOSIZE, который указывает, что окно будет ровно тех же размеров, что и загружаемое в него изображение.
+
+2) void cvShowImage( "Hello World", hw ); — эта функия собственно и отображает изображение в окне;
+
+первый параметр — название окна для вывода картинки,
+
+второй параметр — изображение для вывода.
+
+3) int cvWaitKey( int delay=0 ); — эта функция останавливает программу и ожидает нажатия клавиши заданное число миллисекунд и продолжает программу, если ничего не нажато. 
+Если же, как в нашем случае, параметр функции равен нулю, тогда программа ожидает нажатия клавиши и только потом продолжает работу.
+
+ПРИМЕР:
+char c = cvWaitKey(33);
+if (c == 27) { // если нажали ESC - выходим из цикла
+    break;
+}
+
+4) void cvReleaseImage( &hw ); — функция освобождает память, выделенную под изображение и устанавливает указатель в NULL. 
+
+void cvDestroyWindow( «Hello World» ); — эта функция закрывает окно и освобождает выделенную память.
+
+
+
+2. ЗАГРУЗКА КАРТИНКИ
+
+ПРИМЕР: 
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+IplImage* image = 0;
+IplImage* src = 0;
+
+int main(int argc, char* argv[])
+{
+        // имя картинки задаётся первым параметром
+        char* filename = argc == 2 ? argv[1] : "Image0.jpg";
+        // получаем картинку
+        image = cvLoadImage(filename,1);
+        // клонируем картинку 
+        src = cvCloneImage(image);
+
+        printf("[i] image: %s\n", filename);
+        assert( src != 0 );
+
+        // окно для отображения картинки
+        cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+
+        // показываем картинку
+        cvShowImage("original",image);
+
+        // выводим в консоль информацию о картинке
+        printf( "[i] channels:  %d\n",        image->nChannels );
+        printf( "[i] pixel depth: %d bits\n",   image->depth );
+        printf( "[i] width:       %d pixels\n", image->width );
+        printf( "[i] height:      %d pixels\n", image->height );
+        printf( "[i] image size:  %d bytes\n",  image->imageSize );
+        printf( "[i] width step:  %d bytes\n",  image->widthStep );
+
+        // ждём нажатия клавиши
+        cvWaitKey(0);
+
+        // освобождаем ресурсы
+        cvReleaseImage(& image);
+        cvReleaseImage(&src);
+        // удаляем окно
+        cvDestroyWindow("original");
+        return 0;
+}
+
+
+рассмотрим новые функции, которые использовались в данном примере:
+
+1) IplImage* cvLoadImage( const char* filename, int iscolor=CV_LOAD_IMAGE_COLOR );
+— загружает картинку из файла.
+
+filename — имя файла
+iscolor — определяет как представить картинку
+iscolor > 0 — цветная картинка с 3-мя каналами
+iscolor == 0 — картинка будет загружена в формате GRAYSCALE (градации серого)
+iscolor < 0 — картинка будет загружена как есть:
+/* 8bit, color or not */
+#define CV_LOAD_IMAGE_UNCHANGED  -1
+/* 8bit, gray */
+#define CV_LOAD_IMAGE_GRAYSCALE   0
+/* ?, color */
+#define CV_LOAD_IMAGE_COLOR       1
+/* any depth, ? */
+#define CV_LOAD_IMAGE_ANYDEPTH    2
+/* ?, any color */
+#define CV_LOAD_IMAGE_ANYCOLOR    4
+
+
+функция поддерживает следующие форматы изображений:
+- Windows bitmaps - BMP, DIB
+- JPEG files - JPEG, JPG, JPE
+- Portable Network Graphics - PNG
+- Portable image format - PBM, PGM, PPM
+- Sun rasters - SR, RAS
+- TIFF files - TIFF, TIF
+
+2) IplImage* cvCloneImage( const IplImage* image ); — делает полную копию изображения image, включая заголовок, данные и ROI (Region Of Interest — регион интересов — интересующая область на рисунке).
+
+3) выводимая в консоли инфа: 
+
+image->nChannels // число каналов картинки (RGB, хотя в OpenCV - BGR ) (1-4)
+image->depth    // глубина в битах
+image->width    // ширина картинки в пикселях 
+image->height   // высота картинки в пикселях
+image->imageSize // память занимаемая картинкой (==image->height*image->widthStep)
+image->widthStep // расстояние между соседними по вертикали точками изображения (число байт в одной строчке картинки
+- может потребоваться для самостоятельного обхода всех пикселей изображения)
+
+
+3. ЗАГРУЗКА ВИДЕО
+
+
+ПРИМЕР:
+
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+IplImage* frame =0;
+
+int main(int argc, char* argv[])
+{
+        // имя файла задаётся первым параметром
+        char* filename = argc == 2 ? argv[1] : "test.avi";
+
+        printf("[i] file: %s\n", filename);
+
+        // окно для отображения картинки
+        cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+
+        // получаем информацию о видео-файле
+        CvCapture* capture = cvCreateFileCapture( filename );
+
+        while(1){	
+                // получаем следующий кадр
+                frame = cvQueryFrame( capture ); 
+                if( !frame ) {
+                        break;
+                }
+
+                // здесь можно вставить
+                // процедуру обработки
+
+                // показываем кадр
+                cvShowImage( "original", frame );
+
+                char c = cvWaitKey(33);
+                if (c == 27) { // если нажата ESC - выходим
+                        break;
+                }
+        }
+
+        // освобождаем ресурсы
+        cvReleaseCapture( &capture );
+        // удаляем окно
+        cvDestroyWindow("original");
+        return 0;
+}
+
+1)  CvCapture* capture = cvCreateFileCapture( filename ); — функция принимает название файла для считывания и возвращает указатель на структуру CvCapture, которая содержит информацию о видео-файле.
+
+2) frame = cvQueryFrame( capture ); — получает и возвращает кадр с камеры или из файла. В качестве параметра получает указатель на структуру CvCapture.
+
+! возвращаемое изображение не должно освобождаться или модифицироваться!
+
+3) cvReleaseCapture( CvCapture** capture ); — освобождает память, связанную со структурой CvCapture
+
+4. ПОЛЗУНОК
+
+Ползунок привязывается к конкретному окну функцией cvCreateTrackbar(). У неё, в качестве последнего параметра, передаётся указатель на функцию-обработчик, которая вызывается при изменении положения ползунка. Далее для установки положения на интересующем кадре используется функция cvSetCaptureProperty(), которая устанавливает параметры видеозахвата.
+
+
+ПРИМЕР: 
+
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+CvCapture* capture =0;
+IplImage* frame =0;
+
+//
+// функция-обработчик ползунка - 
+// перематывает на нужный кадр
+void myTrackbarCallback(int pos) {
+        cvSetCaptureProperty(capture, CV_CAP_PROP_POS_FRAMES, pos);
+}
+
+int main(int argc, char* argv[])
+{
+        // имя файла задаётся первым параметром
+        char* filename = argc == 2 ? argv[1] : "test.avi";
+
+        printf("[i] file: %s\n", filename);
+
+        // окно для отображения картинки
+        cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+
+        // получаем информацию о видео-файле
+        capture = cvCreateFileCapture( filename );
+
+        // получаем число кадров
+        double framesCount = cvGetCaptureProperty( capture, CV_CAP_PROP_FRAME_COUNT);
+        printf("[i] count: %.0f\n", framesCount);
+        int frames = (int)framesCount;
+
+        int currentPosition=0;
+        if( frames!= 0 ) {
+                // показываем ползунок
+                cvCreateTrackbar("Position", "original", & currentPosition, frames, myTrackbarCallback);
+        }
+
+        while(1){
+                // получаем следующий кадр
+                frame = cvQueryFrame( capture ); 
+                if( !frame ) {
+                        break;
+                }
+
+                // здесь можно вставить
+                // процедуру обработки
+
+                // показываем кадр
+                cvShowImage( "original", frame );
+
+                char c = cvWaitKey(33);
+                if (c == 27) { // если нажата ESC - выходим
+                        break;
+                }
+        }
+
+        // освобождаем ресурсы
+        cvReleaseCapture( &capture );
+        // удаляем окно
+        cvDestroyWindow("original");
+        return 0;
+}
+
+1) CVAPI(double) cvGetCaptureProperty( CvCapture* capture, int property_id );
+   CVAPI(int)    cvSetCaptureProperty( CvCapture* capture, int property_id, double value );
+
+— получаем/устанавливаем свойства видеозахвата.
+capture — указатель на видео-структуру
+
+
+property_id — идентфикатор свойств:
+===================================
+
+#define CV_CAP_PROP_POS_MSEC       0 // текущее положение в миллисекундах
+#define CV_CAP_PROP_POS_FRAMES     1 // начинающийся от 0 индекс кадра, который должен быть захвачен следующим
+#define CV_CAP_PROP_POS_AVI_RATIO  2 // относительное положение видео-файла 0 - начало, 1 - конец
+#define CV_CAP_PROP_FRAME_WIDTH    3 // ширина изображения 
+#define CV_CAP_PROP_FRAME_HEIGHT   4 // высота изображения
+#define CV_CAP_PROP_FPS            5 // частота кадров
+#define CV_CAP_PROP_FOURCC         6 // 4-буквенный код кодека
+#define CV_CAP_PROP_FRAME_COUNT    7 
+#define CV_CAP_PROP_FORMAT         8 
+#define CV_CAP_PROP_MODE           9
+#define CV_CAP_PROP_BRIGHTNESS    10 // яркость изображения (только для камеры)
+#define CV_CAP_PROP_CONTRAST      11 // контрастность изображения (только для камеры)
+#define CV_CAP_PROP_SATURATION    12 // насыщенность изображения (только для камеры)
+#define CV_CAP_PROP_HUE           13 // тон изображения (только для камеры)
+#define CV_CAP_PROP_GAIN          14
+#define CV_CAP_PROP_EXPOSURE      15
+#define CV_CAP_PROP_CONVERT_RGB   16
+#define CV_CAP_PROP_WHITE_BALANCE 17
+#define CV_CAP_PROP_RECTIFICATION 18
+===================================
+
+
+value — устанавливаемая величина
+
+2) CVAPI(int) cvCreateTrackbar( const char* trackbar_name, const char* window_name, int* value, int count, CvTrackbarCallback on_change);
+
+— создаёт ползунок и отображает его в заданном окне
+
+trackbar_name — название ползунка
+window_name — название окна, в котором будет отображаться ползунок
+value — указатель на целочисленную переменную, которая хранит текущую позицию ползунка.
+count — максимальная позиция ползунка (минимальная всегда 0).
+on_change — указатель на функцию, которая будет вызываться каждый раз при изменении положения ползунка.
+
+3) функция-обработчик должна иметь вид:
+void (CV_CDECL *CvTrackbarCallback2)(int pos, void* userdata);
+
+, где pos — текущее положение ползунка.
+
+Дополнительные функции:
+CVAPI(int) cvGetTrackbarPos( const char* trackbar_name, const char* window_name );
+CVAPI(void) cvSetTrackbarPos( const char* trackbar_name, const char* window_name, int pos );
+— получить/установить положение ползунка
+trackbar_name — название ползунка
+window_name — название окна
+pos — положение
+
+
+5. ЗАХВАТ ВИДЕО С КАМЕРЫ
+
+Работа с камерой почти ничем не отличается от работы с видео.
+Просто вместо функции cvCreateFileCapture() нужно использовать функцию cvCreateCameraCapture(), которая в качестве параметра принимает не название файла, а идентификатор камеры.
+Данная программа представляет собой удобную утилиту для работы с камерой.
+Программа подключается и начинает захват с камеры с помощью cvCreateCameraCapture(), далее получает ширину и высоту кадра с помощью cvGetCaptureProperty(). А потом в цикле при помощи cvQueryFrame() получает картинку с камеры и выводит в окошко.
+При нажатии клавиши ESC программа выйдет из цикла и завершится, а при нажатии клавиши Enter текущий кадр будет сохранён в файл ImageN.jpg, где N — номер кадра, начиная от 0 (Image0.jpg, Image1.jpg и т.д.)
+
+
+ПРИМЕР:
+
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+int main(int argc, char* argv[])
+{
+        // получаем любую подключённую камеру
+        CvCapture* capture = cvCreateCameraCapture(CV_CAP_ANY); //cvCaptureFromCAM( 0 );
+        assert( capture );
+
+        //cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, 640);//1280); 
+        //cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 480);//960); 
+
+        // узнаем ширину и высоту кадра
+        double width = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH);
+        double height = cvGetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT);
+        printf("[i] %.0f x %.0f\n", width, height );
+
+        IplImage* frame=0;
+
+        cvNamedWindow("capture", CV_WINDOW_AUTOSIZE);
+
+        printf("[i] press Enter for capture image and Esc for quit!\n\n");
+
+        int counter=0;
+        char filename[512];
+
+        while(true){
+                // получаем кадр
+                frame = cvQueryFrame( capture );
+
+                // показываем
+                cvShowImage("capture", frame);
+        
+                char c = cvWaitKey(33);
+                if (c == 27) { // нажата ESC
+                        break;
+                }
+                else if(c == 13) { // Enter
+                        // сохраняем кадр в файл
+                        sprintf(filename, "Image%d.jpg", counter);
+                        printf("[i] capture... %s\n", filename);
+                        cvSaveImage(filename, frame);
+                        counter++;
+                }
+        }
+        // освобождаем ресурсы
+        cvReleaseCapture( &capture );
+        cvDestroyWindow("capture");
+        return 0;
+}
+
+1) cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, 640);//1280); 
+cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 480);//960); 
+
+-установка ширины и высоты соответсвенно
+
+2) CVAPI(int) cvSaveImage( const char* filename, const CvArr* image, const int* params CV_DEFAULT(0) );
+— сохраняет изображение в файл
+filename — имя файла
+image — изображение для сохранения
+
+при успешном сохранении функция вернёт 1, а при неудаче — 0.
+
+6. СОБЫТИЯ ОТ МЫШКИ
+
+Перейдём сразу к коду, который загружает картинку и при клике левой кнопкой мышки рисует на картинке целеуказатель.
+Обработчик мышки привязывается с помощью функции cvSetMouseCallback(), причём привязка осуществляется к конкретному окну.
+В данном случае события от мышки обрабатываются функцией myMouseCallback(), которая при клике левой кнопки мышки (CV_EVENT_LBUTTONDOWN) вызывает мою же функцию drawTarget(), которая рисует красный круг и перекрестие из двух линий.
+
+ПРИМЕР:
+
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+IplImage* image = 0;
+IplImage* src = 0;
+
+// рисуем целеуказатель
+void drawTarget(IplImage* img, int x, int y, int radius)
+{
+        cvCircle(img,cvPoint(x, y),radius,CV_RGB(250,0,0),1,8);
+        cvLine(img, cvPoint(x-radius/2, y-radius/2), cvPoint(x+radius/2, y+radius/2),CV_RGB(250,0,0),1,8);
+        cvLine(img, cvPoint(x-radius/2, y+radius/2), cvPoint(x+radius/2, y-radius/2),CV_RGB(250,0,0),1,8);
+}
+
+// обработчик событий от мышки
+void myMouseCallback( int event, int x, int y, int flags, void* param )
+{
+        IplImage* img = (IplImage*) param;
+
+        switch( event ){
+                case CV_EVENT_MOUSEMOVE: 
+                        break;
+
+                case CV_EVENT_LBUTTONDOWN:
+                        printf("%d x %d\n", x, y);
+                        drawTarget(img, x, y, 10);
+                        break;
+
+                case CV_EVENT_LBUTTONUP:
+                        break;
+        }
+}
+
+int main(int argc, char* argv[])
+{
+        // имя картинки задаётся первым параметром
+        char* filename = argc == 2 ? argv[1] : "Image0.jpg";
+        // получаем картинку
+        image = cvLoadImage(filename,1);
+        // клонируем картинку 
+        src = cvCloneImage(image);
+
+        printf("[i] image: %s\n", filename);
+        assert( src != 0 );
+
+        // окно для отображения картинки
+        cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+
+        // вешаем обработчик мышки
+        cvSetMouseCallback( "original", myMouseCallback, (void*) image);
+
+        while(1){
+                // показываем картинку
+                cvCopyImage( image, src );
+                cvShowImage( "original", src );
+
+                char c = cvWaitKey(33);
+                if (c == 27) { // если нажата ESC - выходим
+                        break;
+                }
+        }
+
+        // освобождаем ресурсы
+        cvReleaseImage(&image);
+        cvReleaseImage(&src);
+        // удаляем окно
+        cvDestroyWindow("original");
+        return 0;
+}
+
+1) void cvSetMouseCallback( const char* window_name, CvMouseCallback on_mouse, void* param=NULL );
+— устанавливает обработчик на события от мышки
+
+window_name — название окна, к которому привязывается событие
+on_mouse — указатель на функцию-обработчик, которая будет вызываться для обработки события от мышки над заданным окном 
+param — дополнительный параметр, который можно передать функции-обработчику (в примере — это указатель на изображение)
+
+
+функция-обработчик должна иметь вид:
+typedef void (CV_CDECL *CvMouseCallback )(int event, int x, int y, int flags, void* param);
+
+, где
+event — событие для обработки:
+#define CV_EVENT_MOUSEMOVE      0
+#define CV_EVENT_LBUTTONDOWN    1
+#define CV_EVENT_RBUTTONDOWN    2
+#define CV_EVENT_MBUTTONDOWN    3
+#define CV_EVENT_LBUTTONUP      4
+#define CV_EVENT_RBUTTONUP      5
+#define CV_EVENT_MBUTTONUP      6
+#define CV_EVENT_LBUTTONDBLCLK  7
+#define CV_EVENT_RBUTTONDBLCLK  8
+#define CV_EVENT_MBUTTONDBLCLK  9
+
+x, y — координаты положения указателя в координатах изображения
+flags — флаг события:
+#define CV_EVENT_FLAG_LBUTTON   1
+#define CV_EVENT_FLAG_RBUTTON   2
+#define CV_EVENT_FLAG_MBUTTON   4
+#define CV_EVENT_FLAG_CTRLKEY   8
+#define CV_EVENT_FLAG_SHIFTKEY  16
+#define CV_EVENT_FLAG_ALTKEY    32
+
+
+param — параметр, который может задействовать пользователь (в примере — указатель на картинку).
+
+
+cvCopyImage — на самом деле обёртка для cvCopy
+#define cvCopyImage( src, dst )         cvCopy( src, dst, 0 )
+
+CVAPI(void)  cvCopy( const CvArr* src, CvArr* dst, const CvArr* mask CV_DEFAULT(NULL) );
+— копирует массив src в массив dst
+mask — маска — 8-битный одноканальный массив, с помощью которой можно задать область для копирования
+т.е. в dst будет скопированы только элементы src, для которых маска не равна нулю.
+
+void cvLine(CvArr* img, CvPoint pt1, CvPoint pt2, CvScalar color, int thickness=1, int line type=8, int shift=0 );
+— рисует отрезок линии между двумя точками
+img — картинка для рисования
+pt1 — начальная точка отрезка
+pt2 — конечная точка отрезка
+color — цвет линии, можно задать макросом CV_RGB(r, g, b)
+thickness — толщина линии
+type — тип линии (4-связанная,8-связанная или CV_AA — сглаживание)
+shift — сдвиг 
+
+void cvCircle(CvArr* img, CvPoint center, int radius, CvScalar color, int thickness=1, int line type=8, int shift=0 );
+— рисует круг
+img — картинка для рисования
+center — центр круга
+radius — радиус круга
+color — цвет линии, можно задать макросом CV_RGB(r, g, b)
+thickness — толщина линии
+type — тип линии (4-связанная,8-связанная или CV_AA — сглаживание)
+shift — сдвиг 
+
+7. ОБРАБОТКА ИЗОБРАЖЕНИЯ
+
+1) Сглаживание
+
+cvSmooth(image, dst, CV_GAUSSIAN, 3, 3); — сглаживает картинку (например, для устранения шума)
+src — исходная картинка для обработки
+dst — картинка для сохранения результата операции
+smoothtype — тип сглаживания:
+#define CV_BLUR_NO_SCALE 0
+#define CV_BLUR  1
+#define CV_GAUSSIAN  2
+#define CV_MEDIAN 3
+#define CV_BILATERAL 4
+
+
+CV_BLUR_NO_SCALE — суммирование без масштабирования size1 x size2
+CV_BLUR — суммирование с масштабированием 1/size1 x size2
+CV_GAUSSIAN — свёртка изображения с гауссовым ядром size1 x size2
+CV_MEDIAN — поиск среднего значения в окрестности size1 x size2
+CV_BILATERAL — двусторонняя фильтрация окрестности size1 x size2 с цветовой сигмой = sigma1 и пространственной сигмой = sigma2 (для квадратной окрестности, т.е. size1 = size2)
+сглаживающая фильтрация, при которой значение интенсивности пикселя определяется средневзвешенным значением интенсивности соседних пикселей, причём веса зависят не только от евклидового расстояния, но и от расстояния в цветовом пространстве.
+
+ПРИМЕР: 
+
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+IplImage* image = 0;
+IplImage* dst = 0;
+
+int main(int argc, char* argv[])
+{
+        // имя картинки задаётся первым параметром
+        char* filename = argc == 2 ? argv[1] : "Image0.jpg";
+        // получаем картинку
+        image = cvLoadImage(filename,1);
+        // клонируем картинку 
+        dst = cvCloneImage(image);
+
+        printf("[i] image: %s\n", filename);
+        assert( image != 0 );
+
+        // окно для отображения картинки
+        cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+        cvNamedWindow("smooth",CV_WINDOW_AUTOSIZE);
+
+        // сглаживаем исходную картинку
+        cvSmooth(image, dst, CV_GAUSSIAN, 3, 3);
+
+        // показываем картинку
+        cvShowImage("original",image);
+        cvShowImage("smooth",dst);
+
+        // ждём нажатия клавиши
+        cvWaitKey(0);
+
+        // освобождаем ресурсы
+        cvReleaseImage(&image);
+        cvReleaseImage(&dst);
+        // удаляем окно
+        cvDestroyWindow("original");
+        cvDestroyWindow("smooth");
+        return 0;
+}
+
+
+2) Изменение размеров
+
+ПРИМЕР:
+
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+// исходная 
+IplImage* image = 0;
+IplImage* dst[4];
+
+int main(int argc, char* argv[])
+{
+        // имя картинки задаётся первым параметром
+        char* filename = argc >= 2 ? argv[1] : "Image0.jpg";
+        // получаем картинку
+        image = cvLoadImage(filename,1);
+
+        int i=0;
+
+        printf("[i] image: %s\n", filename);
+        assert( image != 0 );
+
+        // создание уменьшенных картинок (разный тип интерполяции)
+        for(i=0;i<4; i++){
+                dst[i] = cvCreateImage( cvSize(image->width/3, image->height/3), image->depth, image->nChannels );
+                cvResize(image, dst[i], i);
+        }
+
+        // окно для отображения картинки
+        cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+        cvShowImage("original",image);
+
+        // показываем результат
+        char buf[128];
+        for(i=0;i<4; i++){
+                cvNamedWindow( itoa(i, buf, 10) ,CV_WINDOW_AUTOSIZE);
+                cvShowImage(itoa(i, buf, 10), dst[i]);
+        }
+
+        // ждём нажатия клавиши
+        cvWaitKey(0);
+
+        // освобождаем ресурсы
+        cvReleaseImage(&image);
+        for(i=0;i<4; i++){
+                cvReleaseImage(&dst[i]);
+        }
+
+        // удаляем окна
+        cvDestroyAllWindows();
+        return 0;
+}
+
+cvResize(image, dst[i], i); - изменение размеров(масштабирование) изображения
+src — исходное изображение
+dst — изображение для сохранения результа
+interpolation — метод интерполяции:
+#define  CV_INTER_NN        0 // nearest-neigbor - интерполяция методом ближайшего соседа
+#define  CV_INTER_LINEAR    1 // билинейная интерполяция (по умолчанию)
+#define  CV_INTER_CUBIC     2 // 
+#define  CV_INTER_AREA      3 // бикубическая интерполяция
+
+3) ROI - интересующая область 
+
+
+ROI (Region Of Interest — регион интересов — интересующая область изображения) — один из фундаментов OpenCV.
+ROI позволяет пользователю задать определённую прямоугольную область изображения (т.е. ROI всегда должна находится внутри исходного изображения).
+Почти все функции должны поддерживать работу с ROI, т.е. работу с выделенной областью изображения, что полезно для ускорения работы алгоритмов. Т.о. если нас интересует только определённая область изображения — можно её выделить и работать только с ней, не затрагивая всё изображение целиком. 
+
+Вот какие функции для работы с ROI предоставляет OpenCV:
+
+CVAPI(void)  cvSetImageROI( IplImage* image, CvRect rect );
+— установка интересующей области рисунка (COI не меняется)
+image — указатель на изображение
+rect — прямоугольник интересующей области
+
+CVAPI(void)  cvResetImageROI( IplImage* image );
+— сбрасывает область интересов (и COI)
+image — указатель на изображение
+
+CVAPI(CvRect) cvGetImageROI( const IplImage* image );
+— возвращает область интересов изображения
+image — указатель на изображение
+Если ROI не установлена функция вернёт cvRect(0,0,image->width,image->height) 
+
+ROI можно использовать для вырезания части изображения или, наоборот, добавления изображения.
+
+
+ПРИМЕР:
+
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+IplImage* image = 0;
+
+int main(int argc, char* argv[])
+{
+        // имя картинки задаётся первым параметром
+        char* filename = argc >= 2 ? argv[1] : "Image0.jpg";
+        // получаем картинку
+        image = cvLoadImage(filename,1);
+
+        printf("[i] image: %s\n", filename);
+        assert( image != 0 );
+
+        cvNamedWindow("origianl", CV_WINDOW_AUTOSIZE);
+        cvNamedWindow("ROI", CV_WINDOW_AUTOSIZE);  
+
+        // задаём ROI
+        int x = argc >= 3 ? atoi(argv[2]) : 40;
+        int y = argc >= 4 ? atoi(argv[3]) : 20;
+        int width = argc >= 5 ? atoi(argv[4]) : 100;
+        int height = argc >= 6 ? atoi(argv[5]) : 100;
+        // добавочная величина 
+        int add =  argc >= 7 ? atoi(argv[6]) : 200;
+
+        cvShowImage( "origianl", image);
+        // устанавливаем ROI
+        cvSetImageROI(image, cvRect(x,y,width,height));
+        cvAddS(image, cvScalar(add), image);
+        // сбрасываем ROI
+        cvResetImageROI(image);
+        // показываем изображение
+        cvShowImage("ROI", image);
+
+        // ждём нажатия клавиши
+        cvWaitKey(0);
+
+        // освобождаем ресурсы
+        cvReleaseImage( &image );
+        cvDestroyAllWindows(); 
+        return 0;
+}
+
+CVAPI(void)  cvAddS( const CvArr* src, CvScalar value, CvArr* dst,
+                     const CvArr* mask CV_DEFAULT(NULL));
+— рассчёт сумма массива и скаляра (скаляр добавляется к каждому элементу массива)
+формула:
+dst(I)=src(I)+value if mask(I)!=0
+
+src — исходный массив
+value — скаляр для суммирования
+dst — массив для сохранения результата
+mask — маска (8-битный 1-канальный массив, определяющий какие элементы массива подлежат изменению)
+
+4) морфологические преобразования - 1
+
+4.1) Erode — размывание(операция сужения) 
+
+Эрозия (размывание/сужение) изображения обычно используется для избавления от случайных вкраплений на изображении. Идея состоит в том, что вкрапления при размывании устранятся, тогда как крупные и соответсвенно более визуально-значимые регионы остаются.
+
+
+CVAPI(void)  cvErode( const CvArr* src, CvArr* dst,
+                      IplConvKernel* element CV_DEFAULT(NULL),
+                      int iterations CV_DEFAULT(1) );
+— размывает(операция сужения) изображение с использованием фильтра(ядра) один или несколько раз, 
+если element == NULL используется ядро 3х3
+(изображение формируется из локальных минимумов — т.е. будут увеличиваться тёмные области)
+
+4.2) Dilate — растягивание(операция расширения)
+
+Растягивание (расширение) же, по идее, так же должно устранять шум и способствовать объединению областей изображения, которые были разделены шумом, тенями, etc.
+Применение же небольшого растягивания должно сплавить эти области в одну.
+
+ CVAPI(void)  cvDilate( const CvArr* src, CvArr* dst,
+                       IplConvKernel* element CV_DEFAULT(NULL),
+                       int iterations CV_DEFAULT(1) );
+— растягивает(операция расширения) изображение с использованием фильтра(ядра) один или несколько раз, 
+если element == NULL используется ядро 3х3
+(изображение формируется из локальных максимумов — т.е. будут увеличиваться светлые области)
+
+// #define CV_DEFAULT(val) = val
+
+src — исходное изображение
+dst — получаемое изображение
+element — структурирующий элемент (ядро) по-умолчанию NULL — соответствует ядру 3x3 с якорем по-центру.
+
+
+
+4.3) Создание ядра произвольной формы осуществляется функцией cvCreateStructuringElementEx():
+
+CVAPI(IplConvKernel*)  cvCreateStructuringElementEx( int cols, int  rows, int  anchor_x, int  anchor_y, int shape, int* values CV_DEFAULT(NULL) );
+— создание структурирующего элемента (ядра) для морфологических операций. 
+например, cvErode() или cvDilate()
+
+cols — число колонок ядра
+rows — число стор ядра
+anchor_x — относительное горизонтальное смещение якоря ядра
+anchor_y — относительное вертикальное смещение якоря ядра
+shape — форма ядра:
+#define  CV_SHAPE_RECT      0
+#define  CV_SHAPE_CROSS     1
+#define  CV_SHAPE_ELLIPSE   2
+#define  CV_SHAPE_CUSTOM    100
+
+— в последнем случае, форму определяет пользователь через values, которая содержит маску, определяющую какие соседние пиксели должны учитываться
+
+values — указатель на массив, в котором ненулевые элементы определяют значимые пиксели. Если values==NULL все элементы считаются ненулевыми.
+(этот параметр учитывается только в случае shape==CV_SHAPE_CUSTOM)
+
+CVAPI(void)  cvReleaseStructuringElement( IplConvKernel** element );
+— освобождение памяти, выделенной под структурирующий элемент(ядро)
+
+Выбирая различную структуру ядра можно решать различные задачи обработки изображений:
+— подавление шумов;
+— выделение границ объекта;
+— выделение скелета объекта;
+
+ПРИМЕР:
+
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+IplImage* image = 0;
+IplImage* dst = 0;
+
+IplImage* erode = 0;
+IplImage* dilate = 0;
+
+int radius = 1;
+int radius_max=10;
+
+//
+// функция-обработчик ползунка - 
+// радиус ядра
+void myTrackbarRadius(int pos) {
+        radius = pos;
+}
+
+int iterations = 1;
+int iterations_max = 10;
+
+//
+// функция-обработчик ползунка - 
+// число итераций
+void myTrackbarIterations(int pos) {
+        iterations = pos;
+}
+
+int main(int argc, char* argv[])
+{
+        // имя картинки задаётся первым параметром
+        char* filename = argc == 2 ? argv[1] : "Image0.jpg";
+        // получаем картинку
+        image = cvLoadImage(filename,1);
+        // клонируем картинку 
+        dst = cvCloneImage(image);
+        erode = cvCloneImage(image);
+        dilate = cvCloneImage(image);
+
+        printf("[i] image: %s\n", filename);
+        assert( image != 0 );
+
+        // окно для отображения картинки
+        cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+        cvNamedWindow("erode",CV_WINDOW_AUTOSIZE);
+        cvNamedWindow("dilate",CV_WINDOW_AUTOSIZE);
+
+        cvCreateTrackbar("Radius", "original", &radius, radius_max, myTrackbarRadius);
+        cvCreateTrackbar("Iterations", "original", &iterations, iterations_max, myTrackbarIterations);
+
+
+        while(1){
+
+                // показываем картинку
+                cvShowImage("original",image);
+
+                // создаём ядро
+                IplConvKernel* Kern = cvCreateStructuringElementEx(radius*2+1, radius*2+1, radius, radius, CV_SHAPE_ELLIPSE);
+
+                // выполняем преобразования
+                cvErode(image, erode, Kern, iterations);
+                cvDilate(image, dilate, Kern, iterations);
+
+                // показываем результат
+                cvShowImage("erode",erode);
+                cvShowImage("dilate",dilate);
+                
+                cvReleaseStructuringElement(&Kern);
+
+                char c = cvWaitKey(33);
+                if (c == 27) { // если нажата ESC - выходим
+                        break;
+                }
+        }
+
+        // освобождаем ресурсы
+        cvReleaseImage(&image);
+        cvReleaseImage(&dst);
+        cvReleaseImage(&erode);
+        cvReleaseImage(&dilate);
+        // удаляем окно
+        cvDestroyWindow("original");
+        cvDestroyWindow("erode");
+        cvDestroyWindow("dilate");
+        return 0;
+}
+
+
+5) морфологические преобразования - 2
+
+cvMorphologyEx() - обеспечивает более сложные морфологические преобразования изображения. 
+
+CVAPI(void)  cvMorphologyEx( const CvArr* src, CvArr* dst,
+                             CvArr* temp, IplConvKernel* element,
+                             int operation, int iterations CV_DEFAULT(1) );
+
+src — исходное изображение
+dst — изображение для сохранения результата
+temp — для промежуточного хранения результатов (размер изображения должен совпадать с размером исходного изображения) — требуется при определённом значении operation
+operation — определяет тип морфологического преобразования:
+#define CV_MOP_OPEN         2
+#define CV_MOP_CLOSE        3
+#define CV_MOP_GRADIENT     4
+#define CV_MOP_TOPHAT       5
+#define CV_MOP_BLACKHAT     6
+
+5.1) CV_MOP_OPEN — сначала сужается, а затем расширяется. Обычно используется для подсчёта регионов на двоичном изображении.
+
+5.2) CV_MOP_CLOSE — сначала расширяется, а затем сужается. Обычно используется для уменьшения шумовых выбросов на границах регионов.
+
+5.3) CV_MOP_GRADIENT:
+gradient(src) = Dilate(src)–Erode(src)
+Результатом этой операции над двоичным изображением станет выделение периметров существующих пятен. На картинке с градациями серого градиент покажет как быстро меняется яркость (поэтому и называется — градиент).
+
+5.4) CV_MOP_TOPHAT — изолирует яркие локальные пики
+5.5) CV_MOP_BLACKHAT — изоляция тёмных регионов
+
+ПРИМЕР:
+
+#include <cv.h>
+#include <highgui.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+IplImage* image = 0;
+IplImage* open = 0;
+IplImage* close = 0;
+IplImage* gradient = 0;
+IplImage* tophat = 0;
+IplImage* blackhat = 0;
+
+int radius = 1;
+int radius_max=10;
+
+//
+// функция-обработчик ползунка - 
+// радиус ядра
+void myTrackbarRadius(int pos) {
+        radius = pos;
+}
+
+int iterations = 1;
+int iterations_max = 10;
+
+//
+// функция-обработчик ползунка - 
+// число итераций
+void myTrackbarIterations(int pos) {
+        radius = pos;
+}
+
+int main(int argc, char* argv[])
+{
+        // имя картинки задаётся первым параметром
+        char* filename = argc == 2 ? argv[1] : "Image0.jpg";
+        // получаем картинку
+        image = cvLoadImage(filename,1);
+        // клонируем картинку 
+        open = cvCloneImage(image);
+        close = cvCloneImage(image);
+        gradient = cvCloneImage(image);
+        tophat = cvCloneImage(image);
+        blackhat = cvCloneImage(image);
+
+        printf("[i] image: %s\n", filename);
+        assert( image != 0 );
+
+        // окно для отображения картинки
+        cvNamedWindow("original",CV_WINDOW_AUTOSIZE);
+        cvNamedWindow("CV_MOP_OPEN",CV_WINDOW_AUTOSIZE);
+        cvNamedWindow("CV_MOP_CLOSE",CV_WINDOW_AUTOSIZE);
+        cvNamedWindow("CV_MOP_GRADIENT",CV_WINDOW_AUTOSIZE);
+        cvNamedWindow("CV_MOP_TOPHAT",CV_WINDOW_AUTOSIZE);
+        cvNamedWindow("CV_MOP_BLACKHAT",CV_WINDOW_AUTOSIZE);
+
+        cvCreateTrackbar("Radius", "original", &radius, radius_max, myTrackbarRadius);
+        cvCreateTrackbar("Iterations", "original", &iterations, iterations_max, myTrackbarIterations);
+
+        while(1){
+
+                // показываем картинку
+                cvShowImage("original",image);
+
+                // создаём ядро
+                IplConvKernel* Kern = cvCreateStructuringElementEx(radius*2+1, radius*2+1, radius, radius, CV_SHAPE_ELLIPSE);
+
+                // картинка для промежуточного хранения результатов cvCreateImage
+                IplImage* Temp = 0;
+                Temp = cvCreateImage(cvSize(image->width, image->height) , IPL_DEPTH_8U, 1);
+                // выолняем преобразования
+                cvMorphologyEx(image, open, Temp, Kern, CV_MOP_OPEN, iterations);
+                cvMorphologyEx(image, close, Temp, Kern, CV_MOP_CLOSE, iterations);
+                cvMorphologyEx(image, gradient, Temp, Kern, CV_MOP_GRADIENT, iterations);
+                cvMorphologyEx(image, tophat, Temp, Kern, CV_MOP_TOPHAT, iterations);
+                cvMorphologyEx(image, blackhat, Temp, Kern, CV_MOP_BLACKHAT, iterations);
+
+
+                // показываем результат
+                cvShowImage("CV_MOP_OPEN",open);
+                cvShowImage("CV_MOP_CLOSE",close);
+                cvShowImage("CV_MOP_GRADIENT",gradient);
+                cvShowImage("CV_MOP_TOPHAT",tophat);
+                cvShowImage("CV_MOP_BLACKHAT",blackhat);
+                
+                cvReleaseStructuringElement(&Kern);
+                cvReleaseImage(&Temp);
+
+                char c = cvWaitKey(33);
+                if (c == 27) { // если нажата ESC - выходим
+                        break;
+                }
+        }
+
+        // освобождаем ресурсы
+        cvReleaseImage(&image);
+        cvReleaseImage(&open);
+        cvReleaseImage(&close);
+        cvReleaseImage(&gradient);
+        cvReleaseImage(&tophat);
+        cvReleaseImage(&blackhat);
+        // удаляем окна
+        cvDestroyAllWindows();
+        return 0;
+}
+
+
+
+
+
+ 
+

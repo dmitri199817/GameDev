@@ -1,0 +1,41 @@
+——————————————————————
+создание проекта sfml
+——————————————————————
+
+1) новый проект-> « приложение Qt widgets » 
+
+2) вставить исходный код
+
+3) *.pro -> вставить:
+
+CONFIG += console
+CONFIG -= qt
+
+TEMPLATE = app
+
+SOURCES += main.cpp
+LIBS += -L "/Users/dns/sfmltest1/sfmltest1.app/Contents/Frameworks/"
+
+CONFIG(release, debug|release): LIBS += -lsfml-audio -lsfml-graphics  -lsfml-network -lsfml-window -lsfml-system
+CONFIG(debug, debug|release): LIBS += -lsfml-audio -lsfml-graphics  -lsfml-network -lsfml-window -lsfml-system
+
+INCLUDEPATH += /Users/dns/sfmltest1/
+DEPENDPATH += /Users/dns/sfmltest1/
+
+4) собрать проект 
+
+5) пройти в папку с программой -> открыть как папку файл с типом « программа » -> Contents -> создать папку « Frameworks » -> копировать из Frameworks SFML файлы папок: 
+« Frameworks, extlibs, libs »
+
+6) копировать из Frameworks SFML папку « SFML » (лежит внутри include)
+
+——————————————————————————————————————————————————————————————————————————————————————————
+
+добавление файлов в проект
+———————————————————————————
+ 
+1) пройти в папку с программой -> открыть как папку файл с типом « программа » -> MacOS ->
+создать папку -> положить файлы
+
+
+

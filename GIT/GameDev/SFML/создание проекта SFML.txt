@@ -1,0 +1,83 @@
+
+############## СОЗДАНИЕ НОВОГО ПРОЕКТА SFML ##############
+
+1) написать исходный код
+
+2) обозреватель решений(ctrl+alt+L)--> свойства(alt+ВВОД)
+
+3) С/С++ --> Общие --> дополнительные каталоги включаемых файлов -->
+
+ E:\Visual Studio\VC\SFML-2.2\include
+
+4) Компоновщик --> Общие --> дополнительные каталоги библиотек -->
+
+E:\Visual Studio\VC\SFML-2.2\lib
+
+5) Компоновщик --> Ввод --> дополнительные зависимости -->дописать(не заменить)
+
+для Debug:
+sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-audio-d.lib;
+
+для Release:
+sfml-graphics.lib;sfml-window.lib;sfml-system.lib;sfml-audio.lib;
+
+6) С/С++ --> Препроцессор --> SFML_DYNAMIC;
+
+7) Теперь идем в папку E:\Visual Studio\VC\SFML-2.2\bin и копируем всё содержимое этой папки в папку с вашим проектом  в папку debug(release)
+
+8) содержимое папки Дистрибутивы С++ в bin тоже копируем
+
+----------------------------------------------------------------------
+
+############## УБИРАЕМ КОНСОЛЬ ИЗ ПРИЛОЖЕНИЯ  ##############
+
+1) Компоновщик --> Дополнительно --> Точка Входа --> mainCRTStartup
+
+2) Компоновщик --> Система --> Подсистема -->  Windows
+
+----------------------------------------------------------------------
+
+МИНИМАЛЬНЫЙ ИСХОДНЫЙ КОД
+-------------------------
+
+
+#include <SFML/Graphics.hpp>
+ 
+int main()
+{
+	sf::RenderWindow window(sf::VideoMode(200, 200), "SFML WINDOW");
+	sf::CircleShape shape(100.0f);
+	shape.setFillColor(sf::Color::Green);
+ 
+	while (window.isOpen())
+	{
+		sf::Event event;
+		while (window.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				window.close();
+		}
+ 
+		window.clear();
+		window.draw(shape);
+		window.display();
+	}
+ 
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
